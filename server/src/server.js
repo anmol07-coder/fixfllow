@@ -1,15 +1,8 @@
-const express = require("express");
+require("dotenv").config();
 
-const app = express();
+const app = require("./app");
 
-const PORT = 5000;
-
-app.get("/api/health", (req, res) => {
-    res.json({
-        success: true,
-        message: "FixFlow API is running"
-    });
-});
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
     console.log(`FixFlow server running on port ${PORT}`);
