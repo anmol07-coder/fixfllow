@@ -1,5 +1,12 @@
 const express = require("express");
 
+const validate = require("../middleware/validate.middleware");
+
+const {
+    createUserSchema,
+    updateUserSchema
+} = require("../validators/user.validator");
+
 const {
     createUser,
     getUsers,
@@ -10,14 +17,10 @@ const {
 
 const router = express.Router();
 
-router.post("/", createUser);
-
+router.post("/", validate(createUserSchema), createUser);
 router.get("/", getUsers);
-
 router.get("/:id", getUserById);
-
-router.patch("/:id", updateUser);
-
+router.patch("/:id", validate(updateUserSchema), updateUser);
 router.delete("/:id", deleteUser);
 
 module.exports = router;
