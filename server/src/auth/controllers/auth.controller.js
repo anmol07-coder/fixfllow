@@ -15,6 +15,21 @@ const register = async (req, res) => {
   });
 };
 
+const login = async (req, res) => {
+  const user = await authService.loginUser(req.body);
+
+  res.status(200).json({
+    success: true,
+    message: "Login successful",
+    data: {
+      id: user._id,
+      name: user.name,
+      email: user.email
+    }
+  });
+};
+
 module.exports = {
-  register
+  register,
+  login
 };

@@ -21,6 +21,30 @@ const registerUser = async ({ name, email, password }) => {
   return user;
 };
 
+const loginUser = async ({ email, password }) => {
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    const error = new Error("Invalid email or password");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const isPasswordCorrect = await bcrypt.compare(
+    password,
+    user.password
+  );
+
+  if (!isPasswordCorrect) {
+    const error = new Error("Invalid email or password");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  return user;
+};
+
 module.exports = {
-  registerUser
+  registerUser,
+  loginUser
 };
