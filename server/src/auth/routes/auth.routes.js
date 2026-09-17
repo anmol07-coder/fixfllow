@@ -6,7 +6,8 @@ const {
   register,
   login,
   getMe,
-  refresh
+  refresh,
+  logout
 } = require("../controllers/auth.controller");
 
 const validate = require("../../middleware/validate.middleware");
@@ -40,6 +41,11 @@ router.get(
 router.post(
   "/refresh",
   asyncHandler(refresh)
+);
+
+router.post(
+  "/logout",
+  asyncHandler(logout)
 );
 
 module.exports = router;

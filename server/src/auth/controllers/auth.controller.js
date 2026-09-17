@@ -78,9 +78,23 @@ const refresh = async (req, res) => {
   });
 };
 
+const logout = async (req, res) => {
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict"
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Logout successful"
+  });
+};
+
 module.exports = {
   register,
   login,
   getMe,
-  refresh
+  refresh,
+  logout
 };
