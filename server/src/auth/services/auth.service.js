@@ -1,7 +1,9 @@
 const bcrypt = require("bcrypt");
 const User = require("../../models/user.model");
 const {
-  generateAccessToken
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken
 } = require("../../utils/jwt");
 
 const registerUser = async ({ name, email, password }) => {
@@ -48,13 +50,43 @@ const loginUser = async ({ email, password }) => {
     user._id.toString()
   );
 
+  const refreshToken = generateRefreshToken(
+    user._id.toString()
+  );
+
   return {
     user,
-    accessToken
+    accessToken,
+    refreshToken
   };
+};
+
+const refreshAccessToken = async (refreshToken) => {
+  if (!refreshToken) {
+    const error = new Error("Refresh token required");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const decoded = verifyRefreshToken(refreshToken);
+
+  const user = await User.findById(decoded.userId);
+
+  if (!user) {
+    const error = new Error("User not found");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const accessToken = generateAccessToken(
+    user._id.toString()
+  );
+
+  return accessToken;
 };
 
 module.exports = {
   registerUser,
-  loginUser
+  loginUser,
+  refreshAccessToken
 };

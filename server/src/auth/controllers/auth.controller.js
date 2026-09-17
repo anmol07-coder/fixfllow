@@ -17,8 +17,18 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { user, accessToken } =
-    await authService.loginUser(req.body);
+  const {
+    user,
+    accessToken,
+    refreshToken
+  } = await authService.loginUser(req.body);
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
 
   res.status(200).json({
     success: true,
@@ -53,8 +63,24 @@ const getMe = async (req, res) => {
   });
 };
 
+const refresh = async (req, res) => {
+  const { refreshToken } = req.cookies;
+
+  const accessToken =
+    await authService.refreshAccessToken(refreshToken);
+
+  res.status(200).json({
+    success: true,
+    message: "Access token refreshed",
+    data: {
+      accessToken
+    }
+  });
+};
+
 module.exports = {
   register,
   login,
-  getMe
+  getMe,
+  refresh
 };

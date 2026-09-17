@@ -5,7 +5,8 @@ const authenticate = require("../../middleware/auth.middleware");
 const {
   register,
   login,
-  getMe
+  getMe,
+  refresh
 } = require("../controllers/auth.controller");
 
 const validate = require("../../middleware/validate.middleware");
@@ -34,6 +35,11 @@ router.get(
   "/me",
   authenticate,
   asyncHandler(getMe)
+);
+
+router.post(
+  "/refresh",
+  asyncHandler(refresh)
 );
 
 module.exports = router;
