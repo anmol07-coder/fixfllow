@@ -1,5 +1,8 @@
 const bcrypt = require("bcrypt");
 const User = require("../../models/user.model");
+const {
+  generateAccessToken
+} = require("../../utils/jwt");
 
 const registerUser = async ({ name, email, password }) => {
   const existingUser = await User.findOne({ email });
@@ -41,7 +44,14 @@ const loginUser = async ({ email, password }) => {
     throw error;
   }
 
-  return user;
+  const accessToken = generateAccessToken(
+    user._id.toString()
+  );
+
+  return {
+    user,
+    accessToken
+  };
 };
 
 module.exports = {
