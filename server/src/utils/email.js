@@ -46,7 +46,40 @@ const sendVerificationEmail = async (email, token) => {
   });
 };
 
+const sendPasswordResetEmail = async (
+  email,
+  token
+) => {
+  const resetUrl =
+    `${process.env.CLIENT_URL}/reset-password?token=${token}`;
+
+  await sendEmail({
+    to: email,
+    subject: "Reset your FixFlow password",
+    html: `
+      <h2>Reset your FixFlow password</h2>
+
+      <p>
+        We received a request to reset your password.
+      </p>
+
+      <p>
+        Click the link below to create a new password.
+      </p>
+
+      <a href="${resetUrl}">
+        Reset Password
+      </a>
+
+      <p>
+        This link will expire soon.
+      </p>
+    `
+  });
+};
+
 module.exports = {
   sendEmail,
-  sendVerificationEmail
+  sendVerificationEmail,
+  sendPasswordResetEmail
 };

@@ -5,11 +5,14 @@ const {
   generateRefreshToken,
   verifyRefreshToken,
   generateEmailVerificationToken,
-  verifyEmailVerificationToken
+  verifyEmailVerificationToken,
+  generatePasswordResetToken,
+  verifyPasswordResetToken
 } = require("../../utils/jwt");
 
 const {
-  sendVerificationEmail
+  sendVerificationEmail,
+  sendPasswordResetEmail
 } = require("../../utils/email");
 
 const registerUser = async ({ name, email, password }) => {
@@ -134,9 +137,69 @@ const verifyEmail = async (token) => {
   return user;
 };
 
+const forgotPassword = async (email) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return;
+  }
+
+  const resetToken = generatePasswordResetToken(
+    user._id.toString()
+  );
+
+  await sendPasswordResetEmail(
+    user.email,
+    resetToken
+  );
+};
+
+const resetPassword = async ({
+  token,
+  password
+}) => {
+  const decoded =
+    verifyPasswordResetToken(token);
+
+  if (
+    decoded.purpose !== "password-reset"
+  ) {
+    const error = new Error(
+      "Invalid password reset token"
+    );
+
+    error.statusCode = 400;
+
+    throw error;
+  }
+
+  const user = await User.findById(
+    decoded.userId
+  );
+
+  if (!user) {
+    const error = new Error(
+      "Invalid password reset request"
+    );
+
+    error.statusCode = 400;
+
+    throw error;
+  }
+
+  const hashedPassword =
+    await bcrypt.hash(password, 12);
+
+  user.password = hashedPassword;
+
+  await user.save();
+};
+
 module.exports = {
   registerUser,
   loginUser,
   refreshAccessToken,
-  verifyEmail
+  verifyEmail,
+  forgotPassword,
+  resetPassword
 };

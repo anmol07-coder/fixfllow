@@ -59,11 +59,34 @@ const verifyEmailVerificationToken = (token) => {
   );
 };
 
+const generatePasswordResetToken = (userId) => {
+  return jwt.sign(
+    {
+      userId,
+      purpose: "password-reset"
+    },
+    process.env.JWT_PASSWORD_RESET_SECRET,
+    {
+      expiresIn:
+        process.env.JWT_PASSWORD_RESET_EXPIRES_IN || "15m"
+    }
+  );
+};
+
+const verifyPasswordResetToken = (token) => {
+  return jwt.verify(
+    token,
+    process.env.JWT_PASSWORD_RESET_SECRET
+  );
+};
+
 module.exports = {
   generateAccessToken,
   generateRefreshToken,
   verifyAccessToken,
   verifyRefreshToken,
   generateEmailVerificationToken,
-  verifyEmailVerificationToken
+  verifyEmailVerificationToken,
+  generatePasswordResetToken,
+  verifyPasswordResetToken
 };
