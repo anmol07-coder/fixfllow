@@ -1,6 +1,9 @@
 const authService = require("../services/auth.service");
 const User = require("../../models/user.model");
 
+
+// ==================== REGISTER ====================
+
 const register = async (req, res) => {
   const user = await authService.registerUser(req.body);
 
@@ -15,6 +18,9 @@ const register = async (req, res) => {
     }
   });
 };
+
+
+// ==================== LOGIN ====================
 
 const login = async (req, res) => {
   const {
@@ -44,6 +50,9 @@ const login = async (req, res) => {
   });
 };
 
+
+// ==================== GET CURRENT USER ====================
+
 const getMe = async (req, res) => {
   const user = await User.findById(req.user.userId);
 
@@ -63,6 +72,9 @@ const getMe = async (req, res) => {
   });
 };
 
+
+// ==================== REFRESH TOKEN ====================
+
 const refresh = async (req, res) => {
   const { refreshToken } = req.cookies;
 
@@ -78,6 +90,9 @@ const refresh = async (req, res) => {
   });
 };
 
+
+// ==================== LOGOUT ====================
+
 const logout = async (req, res) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
@@ -91,10 +106,35 @@ const logout = async (req, res) => {
   });
 };
 
+
+// ==================== VERIFY EMAIL ====================
+
+const verifyEmail = async (req, res) => {
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).json({
+      success: false,
+      message: "Verification token is required"
+    });
+  }
+
+  await authService.verifyEmail(token);
+
+  res.status(200).json({
+    success: true,
+    message: "Email verified successfully"
+  });
+};
+
+
+// ==================== EXPORT ====================
+
 module.exports = {
   register,
   login,
   getMe,
   refresh,
-  logout
+  logout,
+  verifyEmail
 };

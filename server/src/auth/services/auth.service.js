@@ -3,8 +3,14 @@ const User = require("../../models/user.model");
 const {
   generateAccessToken,
   generateRefreshToken,
-  verifyRefreshToken
+  verifyRefreshToken,
+  generateEmailVerificationToken,
+  verifyEmailVerificationToken
 } = require("../../utils/jwt");
+
+const {
+  sendVerificationEmail
+} = require("../../utils/email");
 
 const registerUser = async ({ name, email, password }) => {
   const existingUser = await User.findOne({ email });
@@ -22,6 +28,16 @@ const registerUser = async ({ name, email, password }) => {
     email,
     password: hashedPassword
   });
+
+  const verificationToken =
+  generateEmailVerificationToken(
+    user._id.toString()
+  );
+
+  await sendVerificationEmail(
+  user.email,
+  verificationToken
+  );
 
   return user;
 };
@@ -46,6 +62,16 @@ const loginUser = async ({ email, password }) => {
     throw error;
   }
 
+  if (!user.isEmailVerified) {
+    const error = new Error(
+      "Please verify your email before logging in"
+    );
+
+    error.statusCode = 403;
+
+    throw error;
+  }
+
   const accessToken = generateAccessToken(
     user._id.toString()
   );
@@ -60,6 +86,7 @@ const loginUser = async ({ email, password }) => {
     refreshToken
   };
 };
+
 
 const refreshAccessToken = async (refreshToken) => {
   if (!refreshToken) {
@@ -85,8 +112,31 @@ const refreshAccessToken = async (refreshToken) => {
   return accessToken;
 };
 
+const verifyEmail = async (token) => {
+  const decoded = verifyEmailVerificationToken(token);
+
+  const user = await User.findById(decoded.userId);
+
+  if (!user) {
+    const error = new Error("User not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (user.isEmailVerified) {
+    return user;
+  }
+
+  user.isEmailVerified = true;
+
+  await user.save();
+
+  return user;
+};
+
 module.exports = {
   registerUser,
   loginUser,
-  refreshAccessToken
+  refreshAccessToken,
+  verifyEmail
 };

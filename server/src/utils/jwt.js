@@ -38,9 +38,32 @@ const verifyRefreshToken = (token) => {
   );
 };
 
+const generateEmailVerificationToken = (userId) => {
+  return jwt.sign(
+    {
+      userId,
+      purpose: "email-verification"
+    },
+    process.env.JWT_EMAIL_VERIFY_SECRET,
+    {
+      expiresIn:
+        process.env.JWT_EMAIL_VERIFY_EXPIRES_IN || "15m"
+    }
+  );
+};
+
+const verifyEmailVerificationToken = (token) => {
+  return jwt.verify(
+    token,
+    process.env.JWT_EMAIL_VERIFY_SECRET
+  );
+};
+
 module.exports = {
   generateAccessToken,
   generateRefreshToken,
   verifyAccessToken,
-  verifyRefreshToken
+  verifyRefreshToken,
+  generateEmailVerificationToken,
+  verifyEmailVerificationToken
 };

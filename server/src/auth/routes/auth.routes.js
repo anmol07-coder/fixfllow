@@ -7,7 +7,8 @@ const {
   login,
   getMe,
   refresh,
-  logout
+  logout,
+  verifyEmail
 } = require("../controllers/auth.controller");
 
 const validate = require("../../middleware/validate.middleware");
@@ -46,6 +47,11 @@ router.post(
 router.post(
   "/logout",
   asyncHandler(logout)
+);
+
+router.get(
+  "/verify-email",
+  asyncHandler(verifyEmail)
 );
 
 module.exports = router;
